@@ -1,0 +1,94 @@
+{{/* TRIGGER COMMAND,  >warn */}}
+
+{{/* Set to 0 for a per user cooldown, set to 1 to make the cooldown global. */}}
+{{$global := 0}}
+
+{{/* Name of the database entry, good for multiple commands that use cooldowns. */}}
+{{$name := "warncooldown"}}
+
+{{/* Length of the cooldown in seconds. */}}
+{{$length := 15}}
+
+{{/* Whether or not to announce when the command is on cooldown 1 for yes 0 for no */}}
+{{$announce := 1}}
+
+
+{{if eq $global 0}}{{$global = .User.ID}}{{else}}{{$global = (toInt64 0)}}{{end}}{{if (dbGet $global $name)}}{{if eq $announce 1}}{{sendMessage nil (cembed
+"title" "WARN"
+"description" (joinStr "" "Momentan comanda este in cooldown inca :" (humanizeDurationSeconds ((dbGet $global $name).ExpiresAt.Sub currentTime)) " pentru a evita griefurile.")
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/699743847713865738/caution.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 40811 )}} {{end}}{{else}}{{dbSetExpire $global $name "cooldown" $length}}
+
+{{if or (hasRoleName "[ MOD ]") (hasRoleName "[ GOD ]") (hasRoleName "[ MANAGER ]") (hasRoleName "[ FONDATOR ]") (hasRoleName "*")}}
+{{if le (len .CmdArgs) 2}}
+{{$args := parseArgs 0 ""
+(carg "user" "user")
+(carg "string" "text")}}
+{{$a := $args.Get 0}}
+{{$b := $args.Get 1}}
+{{$roles := .Member.Roles}}
+{{$pos := 0}}
+{{$secondPos := 0}}
+{{$target := getMember ($a)}}
+{{range .Guild.Roles}}
+{{if in $roles .ID}}
+{{if lt $pos .Position}}
+{{$pos = .Position}}
+{{end}}
+{{end}}
+{{end}}
+{{range .Guild.Roles}}
+{{if in $target.Roles .ID}}
+{{if lt $secondPos .Position}}
+{{$secondPos = .Position}}{{end}}{{end}}{{end}}
+{{if gt $pos $secondPos}}
+{{sendMessage nil (cembed
+"title" "WARN"
+"description" (joinStr "" "Nume admin: " .User.Mention "\nNume utilizator: " (($a).Mention) "\nMotiv: " ($b))
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/699743847713865738/caution.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 40811 )}}
+{{$warn := dbIncr ($a.ID) "WARNINGS" 1}}
+{{$warnings := (toInt (dbGet ($a.ID) "WARNINGS").Value)}}
+{{if eq $warnings 3}}
+{{sendMessage nil (cembed
+"title" "WARN"
+"description" "La urmatorul warn vei primi mute 6 ore!"
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/699743847713865738/caution.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 40811 )}}
+{{end}}
+{{if ge $warnings 4}}
+    {{giveRoleID ($a.ID) 696078590017667153}}
+	{{takeRoleID ($a.ID) 696078590017667153 21600}}
+{{sendMessage nil (cembed
+"title" "AUTO GAG"
+"description" (joinStr "" "Nume admin: AUTO GAG \nNume utilizator: " (($a).Mention) "\nDurata: 6 ore \nMotiv: 4/4 warnings !")
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/696665156192829490/mute_1.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 40811 )}}
+    {{dbSet ($a.ID) "WARNINGS" 0}}
+{{end}}
+{{else}}
+{{sendMessage nil (cembed
+"title" "WARN"
+"description" (joinStr "" "Nu poti folosi comanda pe acest membru!")
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/696666257663197204/traffic.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 15542585 )}}
+{{end}}{{else}}
+{{sendMessage nil (cembed
+"title" "WARN"
+"description" (joinStr "" "Nu ai acces aceasta comanda!")
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/696678733020397620/info.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 15542585 )}}
+{{end}}{{else}}
+{{sendMessage nil (cembed 
+"title" "**WARN**"
+"description" "Sintaxa **invalida**!\n \n Sintaxa: **>warn [user] [motiv]**"
+"thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/669642055026475048/696678733020397620/info.png")
+"footer" (sdict "text" "By Dav!d#4825")
+"color" 15542585 )}}
+{{end}}{{end}}
