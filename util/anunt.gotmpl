@@ -18,7 +18,7 @@
 		{{ $embed.Set "image" (sdict "url" (index . 0).URL) }}
 	{{ end }}
 	{{ $embed.Set "footer" (sdict "text" "Anuntat la ora") }}
-	{{ $embed.Set "timestampt" currentTime }}
+	{{ $embed.Set "timestamp" currentTime }}
 	{{ $embed.Set "color" (randInt 111111 999999) }}
 {{ else }}
 	{{ $embed.Set "author" (sdict "name" .User.Username "icon_url" (.User.AvatarURL "256")) }}
