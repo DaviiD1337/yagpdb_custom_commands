@@ -19,7 +19,7 @@
 	{{ end }}
 	{{ $embed.Set "footer" (sdict "text" "Anuntat la ora") }}
 	{{ $embed.Set "timestampt" currentTime }}
-	{{ $embed.Set "color" (randInt 111111 99999) }}
+	{{ $embed.Set "color" (randInt 111111 999999) }}
 {{ else }}
 	{{ $embed.Set "author" (sdict "name" .User.Username "icon_url" (.User.AvatarURL "256")) }}
 	{{ $embed.Set "description" (print "<:cross:705738821110595607> Ai nevoie de permsiunea **" $perms "** pentru a folosi aceasta comanda !") }}
