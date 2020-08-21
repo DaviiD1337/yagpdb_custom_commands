@@ -5,6 +5,7 @@
 */}}
 {{/* Setari */}}
 {{ $svowner := pune-user-id }}{{/* Aici o sa iti pui idul tau de discord sau al celui ce are ownership pe server-ul de discord. */}}
+{{/* Setari terminate */}}
 
 {{ $perms := `MentionEveryone` }}{{ $valid := false }}{{ $embed := sdict }}{{ $name := "" }}{{ $icon := printf "https://cdn.discordapp.com/icons/%d/%s.webp" .Guild.ID .Guild.Icon }}{{ if eq .User.ID $svowner }}{{ $name = "Owner Server" }}{{ else if (reFind `Administrator` (exec "viewperms")) }}{{ $name = "Fondator" }}{{ else }}{{ $name = "Administrator" }}{{ end }}{{ $dt := 0 }}
 {{ if reFind $perms (exec "viewperms") }}
