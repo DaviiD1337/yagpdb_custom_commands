@@ -1,0 +1,78 @@
+{{ $questno := 0 }}{{ $hasquest := false }}{{ $final := 0}}{{ $dbincr := 0}}{{ $questt := "" }}{{$ended := false}} {{$db := dbGet .User.ID "CREDITS" }}{{$anno := false}} {{$win := 0}}{{$mult := 0}}{{$db = $db.Value | toInt }}{{$culoare := ""}}{{$bet := ""}}{{$choosen := ""}}{{$embed := sdict}}{{$fields := cslice}}{{$embed.Set "author" (sdict "name" .User.Username "icon_url" (.User.AvatarURL "256"))}}
+{{/* Settings */}}
+{{$ch := 751401069476708362}}{{/* Canalul unde se joaca */}}
+{{$maxbet := 10000}}{{/* maximul de credite pe care se poate juca */}}
+{{$minbet := 100}}{{/*minimul de credite pe care se poate juca */}}
+{{/* end settings */}}
+{{$colors := sdict
+"rosu" 12845619
+"verde" 40811
+"albastru" 34749}}
+{{with parseArgs 2 "Sintaxa: ?ruleta <culoare:rosu/verde/negru> <suma>"
+(carg "string" "Culoare")
+(carg "int" "Suma")}}
+	{{$culoare := .Get 0 | lower}}
+	{{$bet := .Get 1}}
+	{{if eq $.Channel.ID $ch}} 
+        {{if not (dbGet $.User.ID "cd_ruleta")}} 
+            {{if inFold (cslice "rosu" "verde" "negru") $culoare}} 
+                {{if not (and (gt $bet $maxbet) (lt $bet $minbet))}} 
+                    {{if ge $db $bet}} 
+                        {{ $silent := dbIncr $.User.ID "CREDITS" (mult $bet -1) }}
+					    {{$var := randInt 100}}
+					    {{if le $var 10}}
+						    {{$choosen = "verde"}}
+						    {{$mult = 10}}
+					    {{else if le $var 45}}
+						    {{$choosen = "rosu"}}
+						    {{$mult = 2}}
+					    {{else}}
+						    {{$choosen = "negru"}}
+						    {{$mult = 2}}
+					    {{end}}
+					    {{if eq $culoare $choosen}}
+						    {{$win = mult $bet $mult}} 
+							    {{$s := dbIncr $.User.ID "CREDITS" $win}} 
+						    {{$fields = $fields.Append (sdict "name" "Ai ales" "value" $culoare "inline" true) }}
+						    {{$fields = $fields.Append (sdict "name" "S-a rulat" "value" $choosen "inline" true) }}
+						    {{$embed.Set "fields" $fields }}
+                            {{$embed.Set "color" $colors.verde}}
+						    {{$embed.Set "description" (print "Ai câștigat **" $win "** credite.")}} 
+						    {{$embed.Set "footer" (sdict "text" (print "Acum ai " (toInt $s) " credite."))}}
+						    {{$anno = true}} 
+						    {{dbSetExpire $.User.ID "cd_ruleta" true 10}} 
+					    {{else}} 
+						    {{$s := dbIncr $.User.ID "CREDITS" (mult $bet -1)}}
+						    {{$fields = $fields.Append (sdict "name" "Ai ales" "value" $culoare "inline" true) }}
+						    {{$fields = $fields.Append (sdict "name" "S-a rulat" "value" $choosen "inline" true) }}
+						    {{$embed.Set "fields" $fields }}
+                            {{$embed.Set "color" $colors.rosu}}
+						    {{$embed.Set "description" (print "Ai pierdut **" $bet "** credite.")}} 
+						    {{$embed.Set "footer" (sdict "text" (print "Acum ai " (toInt $s) " credite."))}}
+						    {{dbSetExpire $.User.ID "cd_ruleta" true 10}} 
+					    {{end}} 
+				{{else}}
+					    {{$embed.Set "description" (print "Nu ai **" $bet "** credite.")}}
+                        {{$embed.Set "color" $colors.albastru}}
+					    {{$embed.Set "footer" (sdict "text" (print "Ai " $db " credite."))}}
+				    {{end}} 
+			    {{else}} 
+				    {{$embed.Set "description" "Poți alege doar dintre culorile: Rosu, Verde și Negru."}}
+                    {{$embed.Set "color" $colors.albastru}}
+				    {{$embed.Set "footer" (sdict "text" (print "Ai " $db " credite."))}}
+			    {{end}} 
+		    {{else}} 
+			    {{$embed.Set "description" (print "Poți sa joci la ruleta doar pe credite între **" $minbet "** și **" $maxbet "**.")}} 
+                {{$embed.Set "color" $colors.albastru}}
+			    {{$embed.Set "footer" (sdict "text" (print "Ai " $db " credite."))}}
+		    {{end}}
+	    {{else}} 
+        {{$embed.Set "color" $colors.albastru}}
+	    {{$embed.Set "description" (print "Mai trebuie sa aștepți încă **" (humanizeDurationSeconds ((dbGet $.User.ID "cd_ruleta").ExpiresAt.Sub currentTime)) "** pana ce poți folosi din nou comanda.")}}
+        {{end}} 
+	    {{else}} 
+            {{$embed.Set "color" $colors.albastru}}
+		    {{$embed.Set "description" (print "Poți folosi comanda doar pe <#" $ch ">")}} 
+    {{end}} 
+{{end}}
+{{sendMessage nil (cembed $embed)}} 
