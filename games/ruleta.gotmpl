@@ -18,7 +18,7 @@
             {{if inFold (cslice "rosu" "verde" "negru") $culoare}} 
                 {{if not (and (gt $bet $maxbet) (lt $bet $minbet))}} 
                     {{if ge $db $bet}} 
-                        {{ $silent := dbIncr $.User.ID "CREDITS" (mult $bet -1) }}
+                        {{$s := dbIncr $.User.ID "CREDITS" (mult $bet -1)}}
 					    {{$var := randInt 100}}
 					    {{if le $var 10}}
 						    {{$choosen = "verde"}}
@@ -32,7 +32,7 @@
 					    {{end}}
 					    {{if eq $culoare $choosen}}
 						    {{$win = mult $bet $mult}} 
-							    {{$s := dbIncr $.User.ID "CREDITS" $win}} 
+							{{$s := dbIncr $.User.ID "CREDITS" $win}} 
 						    {{$fields = $fields.Append (sdict "name" "Ai ales" "value" $culoare "inline" true) }}
 						    {{$fields = $fields.Append (sdict "name" "S-a rulat" "value" $choosen "inline" true) }}
 						    {{$embed.Set "fields" $fields }}
@@ -42,7 +42,6 @@
 						    {{$anno = true}} 
 						    {{dbSetExpire $.User.ID "cd_ruleta" true 10}} 
 					    {{else}} 
-						    {{$s := dbIncr $.User.ID "CREDITS" (mult $bet -1)}}
 						    {{$fields = $fields.Append (sdict "name" "Ai ales" "value" $culoare "inline" true) }}
 						    {{$fields = $fields.Append (sdict "name" "S-a rulat" "value" $choosen "inline" true) }}
 						    {{$embed.Set "fields" $fields }}
