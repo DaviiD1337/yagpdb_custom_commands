@@ -20,10 +20,10 @@ Trigger type: RegEx cu trigger: .*
 			{{ if eq (toInt $s) $cod }}
                 {{ addRoleID $r }}
                 {{ sleep 1 }}
-                {{ sendMessageNoEscape $cc (complexMessage "content" (print .User.Mention) "embed" (cembed "author" (sdict "name" .User.String "icon_url" (.User.AvatarURL "256")) "description" (print .User.Mention " s-a verificat si acum este un membru al serverului ! :hugging:") "color" (randInt 111111 999999) "timestamp" currentTime)) }}	
+                {{ sendMessageNoEscape $cc (complexMessage "content" .User.Mention "embed" (cembed "author" (sdict "name" .User.String "icon_url" (.User.AvatarURL "256")) "description" (print .User.Mention " s-a verificat si acum este un membru al serverului ! :hugging:") "color" (randInt 111111 999999) "timestamp" currentTime)) }}	
                 {{ dbDel .User.ID "COD" }}
             {{ else }}
-		        {{ sendDM (print "**[ DZ ]** Cod gresit! Codul tau este: **" $cod "**")}}
+		        {{ sendDM (print "Cod gresit! Codul tau este: **" $cod "**")}}
 			{{ end }}
 		{{ end }}
 	{{ end }}
