@@ -1,0 +1,38 @@
+{{/* Setari */}}
+{{ $c := x }}{{/* canalul unde se joaca barbut */}}
+{{/* Setari incheiate */}}
+
+{{ $user := 0 }}{{ $dt := 0 }}{{ $suma := 0 }}{{ $embed := sdict }}{{ $embed.Set "author" (sdict "icon_url" (.User.AvatarURL "256") "name" .User.Username) }}{{ $fields := cslice }}
+{{ if eq .Channel.ID $c }}
+    {{ if eq (len .CmdArgs) 1 }}
+        {{ if getMember (index .CmdArgs 0) }}
+            {{ $user = index .CmdArgs 0 | getMember }}
+            {{ if ne $user.User.ID .User.ID }}
+                {{ if dbGet (add $user.User.ID .User.ID) "barbut" }}
+                    {{ $embed.Set "description" (print "<:pro:752201965642973354> | Ai respins cererea de barbut a lui " $user.User.Mention ".") }}
+                    {{ dbDel (add $user.User.ID .User.ID) "barbut" }}
+                {{ else }}
+                    {{ $embed.Set "description" (print "⚠️ | Nu ai o cerere de barbut de la " $user.User.Mention ".") }}
+                    {{ $db = 10 }}
+                {{ end }}
+            {{ else }}
+                {{ $embed.Set "description" (print "⚠️ | Nu poti juca barbut cu tine insuti.")}}
+                {{ $dt = 10 }}
+            {{ end }}
+        {{ else }}
+            {{ $embed.Set "description" (print "⚠️ | `" (index .CmdArgs 0) "` nu este un utilizator valid.") }}
+            {{ $dt = 10 }}
+        {{ end }}
+    {{ else }}
+        {{ $embed.Set "description" "ℹ️ | Sintaxa: **?rbarbut <User:ID/Mention>**" }}
+        {{ $db = 10 }}
+    {{ end }}
+{{ else }}
+    {{ $embed.Set "description" (print "⚠️ | Poti juca barbut doar pe <#" $c ">.") }}
+    {{ $dt = 10 }}
+{{ end }}
+{{ $embed.Set "color" 543252}}
+{{ $messageID := sendMessage nil (cembed $embed) }}
+{{ if $dt }}
+    {{ deleteMessage nil $messageID $dt }}
+{{ end }}
