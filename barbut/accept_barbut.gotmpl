@@ -76,5 +76,5 @@
 {{ $embed.Set "color" 543252}}
 {{ $messageID := sendMessageRetID nil (cembed $embed) }}
 {{ if $dt }}
-    {{ deleteMessage 707675928414650430 $messageID $dt }}
+    {{ deleteMessage nil $messageID $dt }}
 {{ end }}
