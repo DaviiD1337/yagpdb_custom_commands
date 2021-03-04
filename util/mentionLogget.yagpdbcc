@@ -1,0 +1,44 @@
+{{/*
+	Trigger type: Regex
+	Trigger: .*
+
+	Copyright: 2021 Dav!d
+	License: MIT
+	Repository: https://github.com/DaviiD1337/yagpdb_custom_commands
+*/}}
+
+{{/* START OF SETTINGS */}}
+{{ $log := 744670631601111222 }}{{/* Your channel where the log should send */}}
+{{/* END OF SETTINGS */}}
+
+{{ $run := true }}
+{{ if or .Message.Mentions .Message.MentionRoles .Mention.MentionEveryone }}
+    {{ if .Message.Mentions }}
+        {{ if (eq (len .Message.Mentions) 1) }}
+            {{ if (eq (index .Message.Mentions 0).ID .User.ID) }}
+                {{ $run = false }}
+            {{ end }}
+        {{ end }}
+        {{ if $run }}
+            {{ $ex := "png" }}
+            {{ if reFind "a_" .Guild.Icon }}
+                {{ $ex = "gif" }}
+            {{ end}}
+            {{ $icon := print "https://cdn.discordapp.com/icons/" .Guild.ID "/" .Guild.Icon "." $ex "?size=1024" }}	
+            {{ $c := 0 }}
+            {{ range seq 0 (add (len .Message.Mentions) (len .Message.MentionRoles)) }}
+                {{ $c = add $c 1 }}
+            {{ end }}
+            {{ $msgContent := .Message.Content }}
+            {{ if reFind `(?:https?://)?(?:www\.)?(discord(?:app)?\.gg(?:/|\\+/+)|discord(?:app)?\.com(?:/|\\+/+)(?:invite/))\w{2,}|(?:https?://)?(?:www\.)?(?:discord(?:app)?\.(?:io|me|li)|invite\.gg|dsc\.gg|top\.gg\/servers|discordservers\.com\/(?:server|bump))(?:/|\\+/+)[A-z+0-9]{2,}` $msgContent }}
+                {{ $msgContent = reReplace `(?:https?://)?(?:www\.)?(discord(?:app)?\.gg(?:/|\\+/+)|discord(?:app)?\.com(?:/|\\+/+)(?:invite/))\w{2,}|(?:https?://)?(?:www\.)?(?:discord(?:app)?\.(?:io|me|li)|invite\.gg|dsc\.gg|top\.gg\/servers|discordservers\.com\/(?:server|bump))(?:/|\\+/+)[A-z+0-9]{2,}` $msgContent "[**Invite Removed**](https://example.com/)" }}
+            {{ end }}
+            {{ $k := sendMessageRetID $log (cembed 
+            "author" (sdict "name" (printf "%s (ID %d) - %d mentions" .User.String .User.ID $c) "icon_url" (.User.AvatarURL "256"))
+            "description" (printf "**[Mesaj](%s) trimis in <#%d>**\n%s" (printf "https://discord.com/channels/%d/%d/%d" .Guild.ID .Channel.ID .Message.ID) .Channel.ID $msgContent)
+            "footer" (sdict "icon_url" $icon "text" (printf "%s. Mesaj trimis la:" .Guild.Name))
+            "color" 561642
+            "timestamp" currentTime) }}
+        {{ end }}
+    {{ end }}
+{{ end }}
