@@ -35,7 +35,7 @@
             {{ end }}
             {{ $k := sendMessageRetID $log (cembed 
             "author" (sdict "name" (printf "%s (ID %d) - %d mentions" .User.String .User.ID $c) "icon_url" (.User.AvatarURL "256"))
-            "description" (printf "**[Mesaj](%s) trimis in <#%d>**\n%s" (printf "https://discord.com/channels/%d/%d/%d" .Guild.ID .Channel.ID .Message.ID) .Channel.ID $msgContent)
+            "description" (printf "**[Message](%s) sent in <#%d>**\n%s" (printf "https://discord.com/channels/%d/%d/%d" .Guild.ID .Channel.ID .Message.ID) .Channel.ID $msgContent)
             "footer" (sdict "icon_url" $icon "text" (printf "%s. Mesaj trimis la:" .Guild.Name))
             "color" 561642
             "timestamp" currentTime) }}
