@@ -24,9 +24,7 @@
             {{ $ex = "gif" }}
         {{ end }}
         {{ $icon := print "https://cdn.discordapp.com/icons/" .Guild.ID "/" .Guild.Icon "." $ex "?size=1024" }}	
-        {{ range seq 0 (add (len .Message.Mentions) (len .Message.MentionRoles)) }}
-            {{ $c = add $c 1 }}
-        {{ end }}
+        {{ $c = add (len .Message.Mentions) (len .Message.MentionRoles) }}
         {{ if .Message.MentionEveryone }}
             {{ $c = 1 }}
         {{ end }}
