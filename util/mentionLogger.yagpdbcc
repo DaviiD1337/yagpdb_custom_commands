@@ -8,7 +8,7 @@
 */}}
 
 {{/* START OF SETTINGS */}}
-{{ $log := 814038029760725013 }}{{/* Your channel where the log should send */}}
+{{ $log := XXX }}{{/* Your channel where the log should send */}}
 {{/* END OF SETTINGS */}}
 
 {{ $run := true }}{{ $c := 0 }}
