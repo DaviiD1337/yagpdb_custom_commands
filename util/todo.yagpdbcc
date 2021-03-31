@@ -1,0 +1,62 @@
+{{/*
+    Made By Dav!d#8433 (555791735607787580)
+    
+    Trigger type: Command with trigger "todo"
+*/}}
+
+{{ $prefix := index (reFindAllSubmatches `Prefix of \x60\d+\x60: \x60(.+)\x60` (exec "prefix")) 0 1 }}{{ $user := .User }}{{ $embed := sdict }}{{ $embed.Set "color" 6895004 }}{{ $fields := cslice }}{{ $embed.Set "author" (sdict "name" .User.String "icon_url" (.User.AvatarURL "256")) }}
+{{ if .CmdArgs }}
+    {{ if eq (index .CmdArgs 0 | lower) "list" }}
+        {{ $u := getMember .User }}
+        {{ if ge (len .CmdArgs) 2 }}
+            {{ if getMember (index .CmdArgs 1) }}
+                {{ $u = index .CmdArgs 1 | getMember }}
+            {{ end }}
+        {{ end }}
+        {{ $db := (dbGet $u.User.ID "todo").Value }}{{ $c := 1 }}
+        {{ range $k, $v := $db }}
+            {{ $fields = $fields.Append (sdict "name" (printf "Todo #%d" $c) "value" (printf "%s - ID: `%s`" $v $k) "inline" true) }}
+            {{ $c = add $c 1 }}
+        {{ else }}
+            {{ $embed.Set "description" "This user has no TODOs." }}
+        {{ end }}
+        {{ $embed.Set "author" (sdict "name" (printf "%s's TODOs" $u.User.String) "icon_url" ($u.User.AvatarURL "256")) }}
+        {{ $embed.Set "fields" $fields }}
+    {{ else if eq (index .CmdArgs 0 | lower ) "add" }}
+        {{ if ge (len .CmdArgs) 2 }}
+            {{ $db := dbGet .User.ID "todo" }}{{ $sdict := sdict }}
+            {{ range $k, $v := $db.Value }}
+                {{ $sdict.Set $k $v }}
+            {{ end }}
+            {{ $sdict.Set (dbIncr 0 "todoIds" 1 | toInt | str) (slice .StrippedMsg 4) }}
+            {{ $embed.Set "description" (printf "New TODO Added!\n**%s**" (slice .StrippedMsg 4)) }}
+            {{ dbSet .User.ID "todo" $sdict }}
+        {{ else }}
+            {{ $embed.Set "description" "Choose a TODO!" }}
+        {{ end }}
+    {{ else if eq (index .CmdArgs 0 | lower) "remove" }}
+        {{ if ge (len .CmdArgs) 2 }}
+            {{ $toremove := index .CmdArgs 1 | toInt }}{{ $db := dbGet .User.ID "todo" }}{{ $sdict := sdict }}{{ $done := false }}{{ $err := "" }}
+            {{ range $k, $v := $db.Value }}
+                {{ if and (ne (toInt $k) $toremove) (not $done) }}
+                    {{ $sdict.Set $k $v }}
+                {{ else }}
+                    {{ $done = true }}
+                {{ end }}
+            {{ end }}
+            {{ if and (not $done) (not $err) }}
+                {{ $embed.Set "description" "No TODO with that ID finded." }}
+            {{ else }}
+                {{ $embed.Set "description" "TODO Deleted!" }}
+            {{ end }}
+            {{ dbSet .User.ID "todo" $sdict }}
+        {{ else }}
+            {{ $embed.Set "description" "Choose an ID!" }}
+        {{ end }}
+    {{ else }}
+        {{ $embed.Set "description" (printf "Syntax:\n-> **%s add <TODO:Text>**\n-> **%s remove <ID>**\n-> **%s list <Optional: User:ID/Mention>**" .Cmd .Cmd .Cmd) }}
+    {{ end }}
+{{ else }}
+    {{ $embed.Set "description" (printf "Syntax:\n-> **%s add <TODO:Text>**\n-> **%s remove <ID>**\n-> **%s list <Optional: User:ID/Mention>**" .Cmd .Cmd .Cmd) }}
+{{ end }}
+{{ sendMessage nil (cembed $embed) }}
