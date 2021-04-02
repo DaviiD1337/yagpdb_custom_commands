@@ -1,0 +1,9 @@
+{{/*
+  This command removes the afk if the user leaves the server
+  
+  Put this in: Notification & Feeds -> General -> Leave Message3
+  
+  By Dav!d#8433 (555791735607787580) | Repo : https://github.com/DaviiD1337/yagpdb_custom_commands/
+*/}}
+
+{{ dbDel .User.ID "afk" }}
