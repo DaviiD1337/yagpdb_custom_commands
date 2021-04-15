@@ -1,0 +1,29 @@
+{{/*
+	This command verifies the chars (if they are written right or wrong).
+
+	Recommended trigger: Regex with Trigger '.*'
+
+    By Dav!d#8433 (555791735607787580) | Repo : https://github.com/DaviiD1337/yagpdb_custom_commands/
+*/}}
+
+{{/* WORD GEN */}}
+{{ with dbGet 0 "word" }}
+	{{ if eq $.Channel.ID 827922898298994776 }}
+		{{ if $.Message.Content }}
+			{{ if eq .Value.word $.Message.Content }}
+				{{ $win := randInt 150 301 }}
+				{{ $db := dbIncr $.User.ID "CREDITS" $win }}
+				{{ deleteMessage nil .Value.msg 0 }}
+				{{ $e := cembed
+				"color" 16488706
+				"author" (sdict "name" $.User.Username "icon_url" ($.User.AvatarURL "256")) 
+				"timestamp" currentTime
+				"description" (printf "%s is the winner!\n🏆 They won **%d** credits." $.User.Mention $win) }}
+				{{ deleteTrigger 0 }}
+				{{ $s := sendMessageRetID nil $e }}
+				{{ deleteMessage nil $s 30 }}
+				{{ dbDel 0 "word" }}
+			{{ end }}
+		{{ end }}
+	{{ end }}
+{{ end }}

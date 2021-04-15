@@ -1,0 +1,42 @@
+{{/*
+	With this command, every x minutes a set of chars generates and the first one to write them wins a prize.
+
+	Recommended trigger: Minute Timed - 15 minutes.
+
+    By Dav!d#8433 (555791735607787580) | Repo : https://github.com/DaviiD1337/yagpdb_custom_commands/
+*/}}
+
+{{ $ex := or (and (reFind "a_" .Guild.Icon) "gif") "png" }}
+{{ $icon := print "https://cdn.discordapp.com/icons/" .Guild.ID "/" .Guild.Icon "." $ex "?size=1024" }}
+{{ if not .ExecData }}
+    {{ $all := cslice "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z" "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" }}{{ $t := "" }}
+    {{ range seq 5 (randInt 10 30) }}
+        {{ $c := randInt 1 3 }}{{ $temp := index (shuffle $all) 0 }}
+        {{ if eq $c 1 }}
+            {{ $t = printf "%s%s%s" $t $temp "\u200E" }}
+        {{ else }}
+            {{ $t = printf "%s%s%s" $t ($temp | upper) "\u200E" }}
+        {{ end }}
+    {{ end }}
+    {{ $data := sendMessageRetID nil (cembed
+    "author" (sdict "name" .Guild.Name "icon_url" $icon)
+    "title" "WORD EVENT"
+    "description" (printf "__Type the next chars:__\n===> **%s** <====\n\n⚠️ You can't copy paste. ⚠️" $t)
+    "color" 16488706
+    "footer" (sdict "text" (printf "Time allowed: %d seconds" (len $t)) "icon_url" "https://cdn.discordapp.com/attachments/770945353067397159/830500837855330345/clock.png")
+    "timestamp" currentTime) }} 
+    {{ dbSet 0 "word" (sdict "word" (reReplace `‎` $t "") "msg" $data) }}
+    {{ execCC .CCID nil (len $t) "data" }}
+{{ else }}
+    {{ with dbGet 0 "word" }}
+        {{ $t := sendMessageRetID nil (cembed
+        "author" (sdict "name" $.Guild.Name "icon_url" $icon)
+        "title" "WORD EVENT"
+        "description" "The characters were not written in the allowed time!"
+        "color" 16488706
+        "timestamp" currentTime) }} 
+        {{ deleteMessage nil .Value.msg 0 }}
+        {{ deleteMessage nil $t 15 }}
+        {{ dbDel 0 "word" }}
+    {{ end }}
+{{ end }}
