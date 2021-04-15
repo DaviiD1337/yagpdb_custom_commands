@@ -22,6 +22,6 @@
 			{{ $s := sendMessageRetID nil $e }}
 			{{ deleteMessage nil $s 30 }}
 			{{ dbDel 0 "word" }}
-			{{ end }}
+		{{ end }}
 	{{ end }}
 {{ end }}
